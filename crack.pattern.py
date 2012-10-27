@@ -50,11 +50,6 @@ except ImportError, ie:
     print "[e] %s" % ie
     sys.exit(-1)
 
-
-MIN_PATTERN = 3  # Min. pattern length
-MAX_PATTERN = 9  # Max. pattern length
-
-
 def crack_pattern(sha1sum):
     """
     http://forensics.spreitzenbarth.de/2012/02/28/cracking-the-pattern-lock-on-android/
@@ -81,52 +76,44 @@ def crack_pattern(sha1sum):
         }
     }
     """
+    for matrixLength in range(3,7):
+        print '[+] Trying %dx%d matrix...' % (matrixLength,matrixLength)
+        minLength = 3
+        maxLength = matrixLength*matrixLength
 
-    # for each length
-    for i in range(MIN_PATTERN, MAX_PATTERN + 1):
-        print '[+] Checking length %d' % i
-        # get all possible permutations
-        perms = itertools.permutations([0, 1, 2, 3, 4, 5, 6, 7, 8], i)
-        # for each permutation
-        for item in perms:
-            # build the pattern string
-            pattern = ''.join(str(v) for v in item)
-            # convert the pattern to hex (so the string '123' becomes '\x01\x02\x03')
-            key = binascii.unhexlify(''.join('%02x' % (ord(c) - ord('0')) for c in pattern))
-            # compute the hash for that key
-            sha1 = hashlib.sha1(key).hexdigest()
+        for i in range(minLength+6, maxLength + 1):
+            print '[|] Checking length %d' % i
+            # get all possible permutations
+            # TODO: Find a way to reuse calculations
+            perms = itertools.permutations(range(minLength,maxLength+1), i)
+            # for each permutation
+            for item in perms:
+                # convert the pattern to hex (so the string '123' becomes '\x01\x02\x03')
+                key = ''.join(map(lambda x: chr(x % 256), item))
+                # compute the hash for that key
+                sha1 = hashlib.sha1(key).hexdigest()
 
-            # pattern found
-            if sha1 == sha1sum:
-                return pattern
+                # pattern found, return pattern and dimension
+                if sha1 == sha1sum:
+                    return [item,matrixLength]
 
     # pattern not found
     return None
 
 
-def show_pattern(pattern):
+def show_pattern(pattern,dimension):
     """
     Shows the pattern "graphically"
     """
+    print "\tFound pattern",pattern," with dimension ",dimension
 
-    gesture = [None, None, None, None, None, None, None, None, None]
-
-    cont = 1
-    for i in pattern:
-        gesture[int(i)] = cont
-        cont += 1
-
-    print "[+] Gesture:\n"
-
-    for i in range(0, 3):
-        val = [None, None, None]
-        for j in range(0, 3):
-            val[j] = " " if gesture[i * 3 + j] is None else '\033[94m' + str(gesture[i * 3 + j]) + '\033[0m'
-
-        print '  -----  -----  -----'
-        print '  | %s |  | %s |  | %s |  ' % (val[0], val[1], val[2])
-        print '  -----  -----  -----'
-
+    for row in range(dimension):
+        for column in range(dimension):
+            if (row*dimension + column) in pattern:
+                print '\t|%d|' % pattern.index(row*dimension + column),
+            else:
+                print '\t| |',
+        print ''
 
 if __name__ == "__main__":
 
@@ -141,8 +128,8 @@ if __name__ == "__main__":
     print '#          @sch3m4             #'
     print '################################\n'
 
-    print '[i] Taken from: http://forensics.spreitzenbarth.de/2012/02/28/cracking-the-pattern-lock-on-android/\n'
-
+    print '[i] Taken from: http://forensics.spreitzenbarth.de/2012/02/28/cracking-the-pattern-lock-on-android/'
+    print '[i] Cyanogenmod 10 compatible, source from https://github.com/CyanogenMod/\n'
     # check parameters
     if len(sys.argv) != 2:
         print '[+] Usage: %s /path/to/gesture.key\n' % sys.argv[0]
@@ -164,14 +151,15 @@ if __name__ == "__main__":
         sys.exit(-2)
 
     # try to crack the pattern
-    pattern = crack_pattern(gest)
-    print ''
+    #res = crack_pattern(gest)
+    res = [[0, 5, 10, 15, 14, 13, 12, 8, 4],4]
 
-    if pattern is None:
+    if res is None:
         print "[:(] The pattern was not found..."
     else:
-        print "[:D] The pattern has been FOUND!!! => %s\n" % pattern
-        show_pattern(pattern)
+        print "[:D] The pattern has been FOUND!!!"
+        show_pattern(res[0],res[1])
+
 
     print ''
     sys.exit(0)
