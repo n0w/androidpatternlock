@@ -102,7 +102,7 @@ And now the output with a given gesture.key:
 ## Research & Credits
 
 The information above has been taken from http://forensics.spreitzenbarth.de/2012/02/28/cracking-the-pattern-lock-on-android/
-(*) Cyanogenmod v10 allows to use higher dimension matricse (up to 6x6). 
+(*) Cyanogenmod v10 allows to use higher dimension matrices (up to 6x6). 
     Source from: https://github.com/CyanogenMod/android_frameworks_base/blob/jellybean/core/java/com/android/internal/widget/LockPatternView.java
 
 ## There is nothing new
