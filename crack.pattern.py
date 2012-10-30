@@ -81,11 +81,11 @@ def crack_pattern(sha1sum):
         minLength = 3
         maxLength = matrixLength*matrixLength
 
-        for i in range(minLength+6, maxLength + 1):
-            print '[|] Checking length %d' % i
+        for i in range(minLength, maxLength + 1):
+            print ' |  Checking length %d' % i
             # get all possible permutations
             # TODO: Find a way to reuse calculations
-            perms = itertools.permutations(range(minLength,maxLength+1), i)
+            perms = itertools.permutations(range(0,maxLength+1), i)
             # for each permutation
             for item in perms:
                 # convert the pattern to hex (so the string '123' becomes '\x01\x02\x03')
@@ -105,14 +105,14 @@ def show_pattern(pattern,dimension):
     """
     Shows the pattern "graphically"
     """
-    print "\tFound pattern",pattern," with dimension ",dimension
+    print "Found pattern",pattern," dimension ",dimension,":\n"
 
     for row in range(dimension):
         for column in range(dimension):
             if (row*dimension + column) in pattern:
-                print '\t|%d|' % pattern.index(row*dimension + column),
+                print '|%d|' % pattern.index(row*dimension + column),
             else:
-                print '\t| |',
+                print '| |',
         print ''
 
 if __name__ == "__main__":
@@ -151,13 +151,12 @@ if __name__ == "__main__":
         sys.exit(-2)
 
     # try to crack the pattern
-    #res = crack_pattern(gest)
-    res = [[0, 5, 10, 15, 14, 13, 12, 8, 4],4]
+    res = crack_pattern(gest)
 
     if res is None:
         print "[:(] The pattern was not found..."
     else:
-        print "[:D] The pattern has been FOUND!!!"
+        print "[:D] The pattern has been FOUND!!!\n"
         show_pattern(res[0],res[1])
 
 
